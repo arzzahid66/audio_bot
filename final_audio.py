@@ -55,8 +55,8 @@ def chat_completion_call(text):
     # return response.choices[0].message.content
     try:
         prompt = ChatPromptTemplate.from_template(
-            """You are a helpful AI assistant if user ask any {text} from you always reponse in urdu language.
-            if user ask question in any language you should always response in urdu language. """
+            """You are a helpful AI assistant if user ask any question {text} from you always reponse in urdu language.
+            if user ask question in any language you should always speak in urdu language. """
         )
         output_parser = StrOutputParser()
         model = ChatOpenAI(model="gpt-4o-mini")
@@ -73,7 +73,7 @@ def text_to_speech_ai(response):
         raise ValueError("The response text is empty, cannot generate speech.")
     
     client = OpenAI()
-    tts_response = client.audio.speech.create(model="tts-1-hd", voice="Alloy", input=response)
+    tts_response = client.audio.speech.create(model="tts-1-hd", voice="onyx", input=response)
     return tts_response.content  # Get audio content as bytes
 
 async def process_audio(audio_data):
