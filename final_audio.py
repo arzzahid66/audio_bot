@@ -4,6 +4,9 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import streamlit as st
 from st_audiorec import st_audiorec
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_core.output_parsers import StrOutputParser
 
 load_dotenv()
 
@@ -46,11 +49,23 @@ def transcribe_voice_to_text(audio_location, language='ur'):
     return transcript.text
 
 def chat_completion_call(text):
-    client = OpenAI()
-    messages = [{"role": "user", "content": text}]
-    response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
-    return response.choices[0].message.content
-
+    # client = OpenAI()
+    # messages = [{"role": "user", "content": text}]
+    # response = client.chat.completions.create(model="gpt-4o-mini", messages=messages)
+    # return response.choices[0].message.content
+    try:
+        prompt = ChatPromptTemplate.from_template(
+            """You are a helpful AI assistant if user ask any question {text} from you always reponse in urdu language.
+            if user ask question in any language you should always speak in urdu language. """
+        )
+        output_parser = StrOutputParser()
+        model = ChatOpenAI(model="gpt-4o-mini")
+        chain = prompt | model | output_parser
+        res = chain.invoke({"text": text})
+        return res
+    except Exception as e:
+        st.error(f"Error in LLM response generation: {e}")
+        return None
 
 
 def text_to_speech_ai(response):
@@ -58,7 +73,7 @@ def text_to_speech_ai(response):
         raise ValueError("The response text is empty, cannot generate speech.")
     
     client = OpenAI()
-    tts_response = client.audio.speech.create(model="tts-1-hd", voice="onyx", input=response)
+    tts_response = client.audio.speech.create(model="tts-1-hd", voice="shimmer", input=response)
     return tts_response.content  # Get audio content as bytes
 
 async def process_audio(audio_data):
